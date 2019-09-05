@@ -17,6 +17,7 @@ class ServerlessPrivateAWSRegions {
 
     this.hooks = {
       "region_setup:setup": this.setup.bind(this),
+      "before:aws:common:validate:validate": this.prepRegion.bind(this),
       "before:deploy:deploy": this.prepRegion.bind(this),
       "before:remove:remove": this.prepRegion.bind(this),
       "before:deploy:function:initialize": this.prepRegion.bind(this),
@@ -101,28 +102,27 @@ class ServerlessPrivateAWSRegions {
         if (typeof principal == "string") {
           service = principal.split(".")[0];
 
-          var new_princpial = custom_principals.find(x => x.service === service)
-            .principal;
+          var new_principal = custom_principals.find(x => x.service === service);
 
-          if (new_princpial) {
+          if (new_principal) {
+            new_principal = new_principal.principal
             this.pluginLog(
-              `Changing Principal from ${principal} to ${new_princpial}`
+              `Changing Principal from ${principal} to ${new_principal}`
             );
-            principal = new_princpial;
+            principal = new_principal;
           }
         } else if ("Fn::Join" in principal) {
           // using the join intrinsic function to piece together the principal
           var join_principal = principal["Fn::Join"][1][0];
           var service = join_principal.replace(/\.+$/, "");
-          var new_princpial = custom_principals.find(x => x.service === service)
-            .principal;
+          var new_principal = custom_principals.find(x => x.service === service);
 
-          if (new_princpial) {
-            console.log(principal);
+          if (new_principal) {
+            new_principal = new_principal.principal
             this.pluginLog(
-              `Changing Principal from ${principal} to ${new_princpial}`
+              `Changing Principal from ${principal} to ${new_principal}`
             );
-            principal = new_princpial;
+            principal = new_principal;
           }
         } else {
           console.log("something else");

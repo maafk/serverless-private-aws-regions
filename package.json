@@ -1,10 +1,15 @@
 {
   "name": "serverless-private-aws-regions",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maafk/serverless-private-aws-regions"
+  },
+  "homepage": "https://github.com/maafk/serverless-private-aws-regions#readme",
   "description": "Use serverless framework in private aws regions",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\""
   },
   "author": "maafk",
   "license": "MIT"
