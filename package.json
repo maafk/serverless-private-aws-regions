@@ -9,8 +9,12 @@
   "description": "Use serverless framework in private aws regions",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\""
+    "test": "jest"
   },
   "author": "maafk",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^24.9.0",
+    "serverless": "^1.51.0"
+  }
 }

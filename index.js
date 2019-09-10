@@ -1,27 +1,27 @@
-"use strict";
-var fs = require("fs");
-var https = require("https");
+'use strict';
+var fs = require('fs');
+var https = require('https');
 
 class ServerlessPrivateAWSRegions {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.sdk = this.serverless.providers.aws.sdk;
-    this.options = options;
+    this.options = options || {};
 
     this.commands = {
       region_setup: {
-        usage: "Sets up Serverless Framework to work in private AWS regions",
-        lifecycleEvents: ["setup"]
+        usage: 'Sets up Serverless Framework to work in private AWS regions',
+        lifecycleEvents: ['setup']
       }
     };
 
     this.hooks = {
-      "region_setup:setup": this.setup.bind(this),
-      "before:aws:common:validate:validate": this.prepRegion.bind(this),
-      "before:deploy:deploy": this.prepRegion.bind(this),
-      "before:remove:remove": this.prepRegion.bind(this),
-      "before:deploy:function:initialize": this.prepRegion.bind(this),
-      "after:aws:package:finalize:mergeCustomProviderResources": this.updatePrincipals.bind(
+      'region_setup:setup': this.setup.bind(this),
+      'before:aws:common:validate:validate': this.prepRegion.bind(this),
+      'before:deploy:deploy': this.prepRegion.bind(this),
+      'before:remove:remove': this.prepRegion.bind(this),
+      'before:deploy:function:initialize': this.prepRegion.bind(this),
+      'after:aws:package:finalize:mergeCustomProviderResources': this.updatePrincipals.bind(
         this
       )
     };
@@ -70,12 +70,12 @@ class ServerlessPrivateAWSRegions {
     if (bundle) {
     } else {
       throw new this.serverless.classes.Error(
-        "Make sure to define the AWS_CA_BUNDLE environment variable"
+        'Make sure to define the AWS_CA_BUNDLE environment variable'
       );
     }
     const certs = [fs.readFileSync(bundle)];
     this.sdk.config.region = this.serverless.service.provider.region;
-    this.sdk.config.signatureVersion = "v4";
+    this.sdk.config.signatureVersion = 'v4';
     var endpoint = this.getCustomEndpoint();
     if (endpoint) {
       this.sdk.config.endpoint = endpoint;
@@ -96,36 +96,40 @@ class ServerlessPrivateAWSRegions {
     const template_resources = this.serverless.service.provider
       .compiledCloudFormationTemplate.Resources;
     Object.keys(template_resources).forEach(resource => {
-      if (template_resources[resource].Type == "AWS::Lambda::Permission") {
+      if (template_resources[resource].Type == 'AWS::Lambda::Permission') {
         // now check principal
         var principal = template_resources[resource].Properties.Principal;
-        if (typeof principal == "string") {
-          service = principal.split(".")[0];
+        if (typeof principal == 'string') {
+          service = principal.split('.')[0];
 
-          var new_principal = custom_principals.find(x => x.service === service);
+          var new_principal = custom_principals.find(
+            x => x.service === service
+          );
 
           if (new_principal) {
-            new_principal = new_principal.principal
+            new_principal = new_principal.principal;
             this.pluginLog(
               `Changing Principal from ${principal} to ${new_principal}`
             );
             principal = new_principal;
           }
-        } else if ("Fn::Join" in principal) {
+        } else if ('Fn::Join' in principal) {
           // using the join intrinsic function to piece together the principal
-          var join_principal = principal["Fn::Join"][1][0];
-          var service = join_principal.replace(/\.+$/, "");
-          var new_principal = custom_principals.find(x => x.service === service);
+          var join_principal = principal['Fn::Join'][1][0];
+          var service = join_principal.replace(/\.+$/, '');
+          var new_principal = custom_principals.find(
+            x => x.service === service
+          );
 
           if (new_principal) {
-            new_principal = new_principal.principal
+            new_principal = new_principal.principal;
             this.pluginLog(
               `Changing Principal from ${principal} to ${new_principal}`
             );
             principal = new_principal;
           }
         } else {
-          console.log("something else");
+          console.log('something else');
           console.log(typeof principal);
         }
         template_resources[resource].Properties.Principal = principal;
@@ -137,40 +141,40 @@ class ServerlessPrivateAWSRegions {
     if (!s3_custom) {
       return;
     }
-    if (!s3_custom["pattern"] || !s3_custom["return"]) {
+    if (!s3_custom['pattern'] || !s3_custom['return']) {
       throw new this.serverless.classes.Error(
-        "For custom regions, define both a `pattern` and `return` value for the S3Endpoint"
+        'For custom regions, define both a `pattern` and `return` value for the S3Endpoint'
       );
     }
     var linesToAdd = [];
-    if (s3_custom["comment"]) {
-      linesToAdd.push(`// ${s3_custom["comment"]}`);
+    if (s3_custom['comment']) {
+      linesToAdd.push(`// ${s3_custom['comment']}`);
     }
     const custom_endpoint_line = `if (strRegion.match(/${
-      s3_custom["pattern"]
-    }/)) return \`${s3_custom["return"]}\`;`.replace(/\\/g, "");
+      s3_custom['pattern']
+    }/)) return \`${s3_custom['return']}\`;`.replace(/\\/g, '');
 
     linesToAdd.push(custom_endpoint_line);
     const filePath = `${this.serverless.config.serverlessPath}/plugins/aws/utils/getS3EndpointForRegion.js`;
     this.addLinesToFile(
       filePath,
-      "const strRegion = region.toLowerCase();",
+      'const strRegion = region.toLowerCase();',
       linesToAdd,
       2
     );
   }
 
   addLinesToFile(filePath, findLine, appendedLines, prepending_spaces = 0) {
-    this.pluginLog(`Adding \n${appendedLines.join("\n")}\n\nto ${filePath}`);
+    this.pluginLog(`Adding \n${appendedLines.join('\n')}\n\nto ${filePath}`);
     this.restoreOrig(filePath);
     this.backupOrig(filePath);
     var file_text = fs
       .readFileSync(filePath)
       .toString()
-      .split("\n");
+      .split('\n');
     const trimmed = file_text.map(s => s.trim());
     var appendedLines = appendedLines.map(s => {
-      return `${" ".repeat(prepending_spaces)}${s}`;
+      return `${' '.repeat(prepending_spaces)}${s}`;
     });
     const line_no = trimmed.indexOf(findLine);
     if (line_no < 0) {
@@ -179,7 +183,7 @@ class ServerlessPrivateAWSRegions {
       );
     } else {
       file_text.splice(line_no + 1, 0, ...appendedLines);
-      fs.writeFileSync(filePath, file_text.join("\n"), err => {
+      fs.writeFileSync(filePath, file_text.join('\n'), err => {
         if (err) throw err;
         this.pluginLog(`Updated ${filePath}`);
       });
@@ -203,7 +207,7 @@ class ServerlessPrivateAWSRegions {
   }
 
   setup() {
-    this.pluginLog("Running setup for private region");
+    this.pluginLog('Running setup for private region');
     this.alterS3EndpointFunction();
     this.configureAwsSdk();
   }
