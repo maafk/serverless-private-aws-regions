@@ -202,10 +202,6 @@ class ServerlessPrivateAWSRegions {
     }
   }
 
-  alterFiles() {
-    this.alterS3EndpointFunction();
-  }
-
   setup() {
     this.pluginLog('Running setup for private region');
     this.alterS3EndpointFunction();
