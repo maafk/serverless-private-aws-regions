@@ -1,4 +1,5 @@
 'use strict';
+const fs = require('fs');
 const Plugin = require('.');
 const Serverless = require('serverless/lib/Serverless');
 const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider');
@@ -219,6 +220,8 @@ describe('Using the serverless private aws regions plugin', () => {
   describe('Alter S3 endpoint function', () => {
     let serverless;
     let plugin;
+    let tmpPath = 'plugins/aws/utils';
+    let tmpFile = 'getS3EndpointForRegion.js';
 
     beforeEach(() => {
       serverless = new Serverless();
@@ -237,10 +240,37 @@ describe('Using the serverless private aws regions plugin', () => {
           }
         }
       };
+
+      fs.mkdirSync(tmpPath, { recursive: true });
+      fs.copyFileSync(
+        `${serverless.config.serverlessPath}/${tmpPath}/${tmpFile}`,
+        `./${tmpPath}/${tmpFile}`
+      );
       serverless.config.serverlessPath = '.';
       plugin = new Plugin(serverless);
     });
+    afterEach(() => {
+      fs.unlinkSync(`./${tmpPath}/${tmpFile}`);
+      fs.unlinkSync(`./${tmpPath}/${tmpFile}.orig`);
+      let spl = tmpPath.split('/');
+      for (let i = 0; i < spl.length; i++) {
+        fs.rmdirSync(spl.join('/'));
+        spl.pop();
+      }
+    });
 
-    test('alterS3EndpointFunction updates the file', () => {});
+    test('alterS3EndpointFunction updates the file', () => {
+      plugin.alterS3EndpointFunction();
+      var file_text = fs
+        .readFileSync(`./${tmpPath}/${tmpFile}`)
+        .toString()
+        .split('\n');
+      let expected_return =
+        serverless.service.custom.customRegion.s3Endpoint.return;
+      let matched_return = file_text.filter(item => {
+        return item.indexOf(expected_return) !== -1;
+      });
+      expect(matched_return.length).toBe(1);
+    });
   });
 });

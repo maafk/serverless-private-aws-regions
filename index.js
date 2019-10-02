@@ -21,6 +21,10 @@ class ServerlessPrivateAWSRegions {
       'before:deploy:deploy': this.prepRegion.bind(this),
       'before:remove:remove': this.prepRegion.bind(this),
       'before:deploy:function:initialize': this.prepRegion.bind(this),
+      'before:invoke:invoke': this.prepRegion.bind(this),
+      'before:info:info': this.prepRegion.bind(this),
+      'before:rollback:initialize': this.prepRegion.bind(this),
+      'before:logs:logs': this.prepRegion.bind(this),
       'after:aws:package:finalize:mergeCustomProviderResources': this.updatePrincipals.bind(
         this
       )
@@ -200,10 +204,6 @@ class ServerlessPrivateAWSRegions {
     if (fs.existsSync(`${filePath}.orig`)) {
       fs.renameSync(`${filePath}.orig`, filePath);
     }
-  }
-
-  alterFiles() {
-    this.alterS3EndpointFunction();
   }
 
   setup() {
