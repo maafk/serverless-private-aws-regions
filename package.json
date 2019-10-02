@@ -1,6 +1,6 @@
 {
   "name": "serverless-private-aws-regions",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/maafk/serverless-private-aws-regions"
