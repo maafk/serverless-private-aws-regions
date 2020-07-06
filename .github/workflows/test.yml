@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [ '8', '10', '12' ]
+        node: [ '10', '12' ]
     
       fail-fast: true
     steps:
