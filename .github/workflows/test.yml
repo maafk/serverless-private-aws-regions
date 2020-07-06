@@ -1,0 +1,31 @@
+name: test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }} testing
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ '10', '12' ]
+    
+      fail-fast: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - run: |
+          npm install
+          ls -la /etc/ssl/certs/
+      - run: npm run test
+        env:
+          AWS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+
