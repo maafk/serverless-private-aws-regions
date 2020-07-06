@@ -26,6 +26,6 @@ jobs:
           npm install
           ls -la /etc/ssl/certs/
       - run: npm run test
-          env:
+        env:
           AWS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
 
