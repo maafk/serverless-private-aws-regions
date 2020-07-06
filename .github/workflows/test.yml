@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Node ${{ marix.node }} testing
+    name: Node ${{ matrix.node }} testing
     runs-on: ubuntu-latest
     strategy:
       matrix:
