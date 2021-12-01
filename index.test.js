@@ -14,7 +14,7 @@ describe('Using the serverless private aws regions plugin', () => {
       jest.resetModules();
       process.env = { ...OLD_ENV };
       delete process.env.NODE_ENV;
-      process.env.AWS_CA_BUNDLE = '/usr/local/etc/openssl/cert.pem';
+      process.env.AWS_CA_BUNDLE = '/etc/ssl/certs/ca-certificates.crt';
 
       serverless = new Serverless();
       serverless.setProvider('aws', new AwsProvider(serverless));
